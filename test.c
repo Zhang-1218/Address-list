@@ -31,7 +31,7 @@ void test()
 	con my_con;
 	Init_my_con(&my_con); //初始化结构体
 	int input = 0;
-	do 
+	do
 	{
 		menu();
 		printf("please choose：< ");
