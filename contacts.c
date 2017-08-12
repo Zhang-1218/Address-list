@@ -11,13 +11,51 @@ void Init_my_con(p _con)
 		perror("Init_my_con malloc");
 		exit(EXIT_FAILURE);
 	}
-	memset(_con->data, 0, sizeof(_con->data));//³õÊ¼»¯½á¹¹ÌåÄÚÈİÎª0
+	memset(_con->data, 0, sizeof(_con->data));//åˆå§‹åŒ–ç»“æ„ä½“å†…å®¹ä¸º0
 	_con->sz = 0;
 	_con->capacity = MAX;
+	Load_inform(_con);
 }
+
+//æ–‡æœ¬æ¨¡å¼ä¸‹ï¼Œè¯»å–æ–‡æœ¬å†…å®¹ä¸­çš„è”ç³»äººä¿¡æ¯
+void Load_inform(p _con)
+{
+	inform temp;
+	FILE* pfout = fopen("contact", "r");//ä»¥åªè¯»æ¨¡å¼æ‰“å¼€æ–‡æœ¬æ–‡ä»¶
+	if(pfout = NULL)
+	{
+		perror("file::read");
+		exit(EXIT_FAILURE);
+	}
+	while(fread(&temp, sizeof(inform), 1, pfout))//ä»æ–‡ä»¶ä¸­å°†è”ç³»äººä¿¡æ¯æ‹·è´è‡³é€šè®¯å½•ä¹‹ä¸­
+	{
+		Check_capacity(_con);
+		_con->data[_con->sz] = temp;
+		_con->sz++;
+	}
+}
+
+//ä¿å­˜é€šè®¯å½•ä¸­çš„ä¿¡æ¯è‡³æ–‡ä»¶ä¹‹ä¸­
+void Save_inform(p _con)
+{
+	int i = 0;
+	FILE* pfin = fopen("contact.txt", "w");//ä»¥å†™å…¥æ–¹å¼æ‰“å¼€æ–‡ä»¶
+	if (pfin == NULL)
+	{
+		perror("file::write");
+		exit(EXIT_FAILURE);
+	}
+	for (i = 0; i < _con->sz; i++)//å°†è”ç³»äººä¿¡æ¯å†™å…¥æ–‡ä»¶
+	{
+		fwrite(_con->data + i, sizeof(inform), 1, pfin);
+	}
+	fclose(pfin); //å…³é—­æ–‡ä»¶
+}
+
 
 void Destroy_inform(p _con)
 {
+	Save_inform(_con);//è”ç³»äººä¿¡æ¯ä¿å­˜å‡½æ•°
 	free(_con->data);
 	_con->data = NULL;
 	_con->sz = 0;
@@ -39,7 +77,7 @@ void Check_capacity(p _con)
 	}
 }
 
-void Add_inform(p _con)//Ìí¼ÓÁªÏµÈËº¯Êı
+void Add_inform(p _con)//æ·»åŠ è”ç³»äººå‡½æ•°
 {
 	if (_con->sz == _con->capacity)
 	{
@@ -57,7 +95,7 @@ void Add_inform(p _con)//Ìí¼ÓÁªÏµÈËº¯Êı
 	printf("Please input phone:<");
 	scanf("%s", _con->data[_con->sz].tele);
 
-	printf("Added successfully£¡\n");
+	printf("Added successfullyï¼\n");
 	_con->sz++;
 }
 
@@ -68,20 +106,20 @@ int Search_inform(const p _con, char * _name)
 
 	while ((a <= _con->sz) && (ret = (strcmp(_con->data[a].name, _name))))
 	{
-		a++; //±éÀú²éÕÒ¶ÔÏóÊÇ·ñ´æÔÚ
+		a++; //éå†æŸ¥æ‰¾å¯¹è±¡æ˜¯å¦å­˜åœ¨
 	}
 
 	if (ret == 0)
-		return a; //´æÔÚ·µ»ØÆäËùÔÚÎ»Êı
+		return a; //å­˜åœ¨è¿”å›å…¶æ‰€åœ¨ä½æ•°
 	else
-		return -1; //²»´æÔÚ·µ»Ø-1
+		return -1; //ä¸å­˜åœ¨è¿”å›-1
 }
 
-void Show_inform(p _con, int a) //¸ù¾İSearch_inforº¯ÊıµÄ²éÕÒ½á¹û£¬·Ö±ğ´¦ÀíÇé¿ö
+void Show_inform(p _con, int a) //æ ¹æ®Search_inforå‡½æ•°çš„æŸ¥æ‰¾ç»“æœï¼Œåˆ†åˆ«å¤„ç†æƒ…å†µ
 {
 	if (a != -1)
 	{
-		printf("%5s\t%5s\t%3s\t%12s\t%15s\n", "ĞÕÃû", "ĞÔ±ğ", "ÄêÁä", "×¡Ö·", "µç»°");
+		printf("%5s\t%5s\t%3s\t%12s\t%15s\n", "å§“å", "æ€§åˆ«", "å¹´é¾„", "ä½å€", "ç”µè¯");
 		printf("%5s\t%5s\t%3d\t%12s\t%10s\n",
 			_con->data[a].name,
 			_con->data[a].male,
@@ -95,7 +133,7 @@ void Show_inform(p _con, int a) //¸ù¾İSearch_inforº¯ÊıµÄ²éÕÒ½á¹û£¬·Ö±ğ´¦ÀíÇé¿ö
 	}
 }
 
-void Del_inform(p _con)//É¾³ı¶ÔÓ¦ÁªÏµÈË
+void Del_inform(p _con)//åˆ é™¤å¯¹åº”è”ç³»äºº
 {
 	int a = 0;
 	int input = 0;
@@ -103,13 +141,13 @@ void Del_inform(p _con)//É¾³ı¶ÔÓ¦ÁªÏµÈË
 
 	if (_con->sz <= 0)
 	{
-		printf("The address book is empty£¡\n");
+		printf("The address book is emptyï¼\n");
 		return ;
 	}
 
 	printf("Please enter the person you want to delete:< ");
 	scanf("%s", _name);
-	a = Search_inform(_con, _name); //²éÕÒÍ¨Ñ¶Â¼ÖĞÊÇ·ñ´æÔÚ¶ÔÏó
+	a = Search_inform(_con, _name); //æŸ¥æ‰¾é€šè®¯å½•ä¸­æ˜¯å¦å­˜åœ¨å¯¹è±¡
 
 	if (a == -1)
 	{
@@ -117,9 +155,9 @@ void Del_inform(p _con)//É¾³ı¶ÔÓ¦ÁªÏµÈË
 		return ;
 	}
 
-	Show_inform(_con, a); //´òÓ¡¶ÔÏóĞÅÏ¢
-	printf("Please confirm whether to delete  %s£¿\n", _con->data[a].name);//½»»¥½çÃæ£¬ÈÃÓÃ»§È·¶¨ÊÇ·ñÈ·ÈÏÉ¾³ı¶ÔÏó
-	printf("confirm£º1    cancel£º0\nPlease input:<");
+	Show_inform(_con, a); //æ‰“å°å¯¹è±¡ä¿¡æ¯
+	printf("Please confirm whether to delete  %sï¼Ÿ\n", _con->data[a].name);//äº¤äº’ç•Œé¢ï¼Œè®©ç”¨æˆ·ç¡®å®šæ˜¯å¦ç¡®è®¤åˆ é™¤å¯¹è±¡
+	printf("confirmï¼š1    cancelï¼š0\nPlease input:<");
 	do
 	{
 		scanf("%d", &input);
@@ -128,32 +166,32 @@ void Del_inform(p _con)//É¾³ı¶ÔÓ¦ÁªÏµÈË
 		case 1:
 			while (a < _con->sz) 
 			{
-				_con->data[a] = _con->data[a + 1];//Í¨¹ı½«¶ÔÏóÖ®ºóµÄÁªÏµÈËÕûÌåÏòÇ°Å²¶¯Ò»Î»£¬¶Ô¶ÔÏó½øĞĞ¸²¸Ç£¬´ïµ½É¾³ıÄ¿µÄ
+				_con->data[a] = _con->data[a + 1];//é€šè¿‡å°†å¯¹è±¡ä¹‹åçš„è”ç³»äººæ•´ä½“å‘å‰æŒªåŠ¨ä¸€ä½ï¼Œå¯¹å¯¹è±¡è¿›è¡Œè¦†ç›–ï¼Œè¾¾åˆ°åˆ é™¤ç›®çš„
 				a++;
 			}
-			_con->sz--; //_con->szµÄÖ¸ÏòÏòÇ°Å²¶¯Ò»Î»
+			_con->sz--; //_con->szçš„æŒ‡å‘å‘å‰æŒªåŠ¨ä¸€ä½
 			printf("successfully deleted\n");
 			return ;
 		case 0:
 			return ;
 		default:
-			printf("Choose the wrong, please re-select£¡\n");
+			printf("Choose the wrong, please re-selectï¼\n");
 			break;
 		}
 	} while (input);
 }
 
-void Find_inform(p _con)//²éÕÒ¶ÔÏóº¯Êı
+void Find_inform(p _con)//æŸ¥æ‰¾å¯¹è±¡å‡½æ•°
 {
 	char _name[20];
 	int a = 0;
 	printf("Please enter the person you want to find:< ");
 	scanf("%s", _name);
-	a = Search_inform( _con, _name);//±éÀú²éÕÒ¶ÔÏóÊÇ·ñ´æÔÚ
-	Show_inform(_con, a);//Êä³ö¶ÔÓ¦½á¹û
+	a = Search_inform( _con, _name);//éå†æŸ¥æ‰¾å¯¹è±¡æ˜¯å¦å­˜åœ¨
+	Show_inform(_con, a);//è¾“å‡ºå¯¹åº”ç»“æœ
 }
 
-void Mod_inform(p _con)//ĞŞ¸Ä¶ÔÏóĞÅÏ¢
+void Mod_inform(p _con)//ä¿®æ”¹å¯¹è±¡ä¿¡æ¯
 {
 	int a = 0;
 	int input = 0;
@@ -161,7 +199,7 @@ void Mod_inform(p _con)//ĞŞ¸Ä¶ÔÏóĞÅÏ¢
 	printf("Please enter the contact you want to modify:<");
 	scanf("%s", _name);
 
-	a = Search_inform(_con, _name); //±éÀú²éÕÒ¶ÔÏóÊÇ·ñ´æÔÚ
+	a = Search_inform(_con, _name); //éå†æŸ¥æ‰¾å¯¹è±¡æ˜¯å¦å­˜åœ¨
 	if (a == -1)
 	{
 		printf("Input error, address book without this contact!\n");
@@ -200,19 +238,19 @@ void Mod_inform(p _con)//ĞŞ¸Ä¶ÔÏóĞÅÏ¢
 			printf("Saved successfully\n");
 			break;
 		default:
-			printf("Choose the wrong, please re-select£¡\n");
+			printf("Choose the wrong, please re-selectï¼\n");
 			break;
 		}
 	} while (input);
 }
 
-void Dis_inform(p _con)//ÏÔÊ¾ËùÓĞ¶ÔÏóĞÅÏ¢
+void Dis_inform(p _con)//æ˜¾ç¤ºæ‰€æœ‰å¯¹è±¡ä¿¡æ¯
 {
 	int i = 0;
 
-	if (_con->sz == 0)//ÅĞ¶ÏÍ¨Ñ¶Â¼ÊÇ·ñÎª¿Õ
+	if (_con->sz == 0)//åˆ¤æ–­é€šè®¯å½•æ˜¯å¦ä¸ºç©º
 	{
-		printf("The address book is empty£¡\n");
+		printf("The address book is emptyï¼\n");
 		return;
 	}
 
@@ -229,9 +267,9 @@ void Dis_inform(p _con)//ÏÔÊ¾ËùÓĞ¶ÔÏóĞÅÏ¢
 	}
 }
 
-void Emp_inform(p _con)//Çå³ıÍ¨Ñ¶Â¼ÄÚÈİ
+void Emp_inform(p _con)//æ¸…é™¤é€šè®¯å½•å†…å®¹
 {
-	//memset(_con->data, NULL, sizeof(_con->data));//½«Í¨Ñ¶Â¼ÄÚÈİÈ«²¿ÖÃÎªNULL
+	//memset(_con->data, NULL, sizeof(_con->data));//å°†é€šè®¯å½•å†…å®¹å…¨éƒ¨ç½®ä¸ºNULL
 	_con->sz = 0;
 	printf("Clear success\n");
 }
@@ -250,20 +288,20 @@ void Sorting(p _con, const int input)
 			switch (input)
 			{
 			case 1:
-				ret = strcmp(_con->data[j].name, _con->data[j + 1].name);//Í¨¹ıĞÕÃû½øĞĞÅÅĞò
+				ret = strcmp(_con->data[j].name, _con->data[j + 1].name);//é€šè¿‡å§“åè¿›è¡Œæ’åº
 				break;
 			case 2:
-				ret = strcmp(_con->data[j].male, _con->data[j + 1].male);//Í¨¹ıĞÔ±ğ½øĞĞÅÅĞò
+				ret = strcmp(_con->data[j].male, _con->data[j + 1].male);//é€šè¿‡æ€§åˆ«è¿›è¡Œæ’åº
 				break;
 			case 3:
-				if (_con->data[j].age - _con->data[j + 1].age > 0) //Í¨¹ıÄêÁä½øĞĞÅÅĞò
+				if (_con->data[j].age - _con->data[j + 1].age > 0) //é€šè¿‡å¹´é¾„è¿›è¡Œæ’åº
 					ret = -1;
 				break;
 			case 4:
-				ret = strcmp(_con->data[j].addr, _con->data[j + 1].addr);//Í¨¹ıµØÖ·½øĞĞÅÅĞò
+				ret = strcmp(_con->data[j].addr, _con->data[j + 1].addr);//é€šè¿‡åœ°å€è¿›è¡Œæ’åº
 				break;
 			case 5:
-				ret = strcmp(_con->data[j].tele, _con->data[j + 1].tele);//Í¨¹ıµç»°½øĞĞÅÅĞò
+				ret = strcmp(_con->data[j].tele, _con->data[j + 1].tele);//é€šè¿‡ç”µè¯è¿›è¡Œæ’åº
 				break;
 			}
 
@@ -275,11 +313,11 @@ void Sorting(p _con, const int input)
 			}
 		}
 	}
-	printf("Sorted successfully£¡\n");
+	printf("Sorted successfullyï¼\n");
 	Dis_inform(_con);
 }
 
-void Sort_inform(p _con)//ÅÅĞòº¯Êı
+void Sort_inform(p _con)//æ’åºå‡½æ•°
 {
 	int j = 0;
 	int input = 0;
@@ -292,3 +330,4 @@ void Sort_inform(p _con)//ÅÅĞòº¯Êı
 
 
 
+	
